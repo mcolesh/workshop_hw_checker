@@ -11,6 +11,7 @@ import glob
 import os
 import re
 import shutil
+import stat
 from zipfile import ZipFile
 
 import pandas as pd
@@ -59,10 +60,13 @@ def handle_readonly(func, path, exc_info):
         raise  # Reraise the exception if it's not a permission issue
 
 
-def delete_path_if_needed(path) -> None:
+def delete_folder_if_needed(path) -> None:
     if os.path.exists(path):
         shutil.rmtree(path, onerror=handle_readonly)
-        os.chmod(path, 0o0777)
+
+
+def delete_file_if_needed(path) -> None:
+    if os.path.exists(path):
         os.remove(path)
 
 
@@ -80,8 +84,8 @@ def init_student_entry(grades, student_name):
 
 
 def calculate_grades() -> list:
-    delete_path_if_needed(os.path.join(root_folder, output_file))
-    delete_path_if_needed(os.path.join(root_folder, temp_folder))
+    delete_file_if_needed(os.path.join(root_folder, output_file))
+    delete_folder_if_needed(os.path.join(root_folder, temp_folder))
     grades = {}
     all_students_zip_file = glob.glob(f"{root_folder}/*.zip")[0]
     # zip of all students homeworks
