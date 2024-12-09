@@ -17,6 +17,8 @@ from zipfile import ZipFile
 import pandas as pd
 from rarfile import RarFile
 
+from students_consts_2024 import students_name_to_id
+
 # Define paths
 root_folder = ".\\src\\hw1"
 temp_folder = ".\\temp"
@@ -77,10 +79,19 @@ def save_dic_to_csv_file(dic, csv_path):
 
 
 def init_student_entry(grades, student_name):
-    student = grades[student_name] = {}
+    student_identifier = students_name_to_id.get(student_name, student_name)
+    student = grades[student_identifier] = {}
     student["grade"] = 0
     student["jupyter_notebook_dependency_added"] = False
     student["jupyter_notebook_vsc_extention_added"] = False
+
+
+def get_student_comment(student):
+    if student["jupyter_notebook_dependency_added"] and student["jupyter_notebook_vsc_extention_added"]:
+        return "The zip file matches the task requirements."
+    if student["jupyter_notebook_dependency_added"] and not student["jupyter_notebook_vsc_extention_added"]:
+        return "You forgot to include a recommendation to install the Notebook extension in the VSC config file (mp_project.code-workspace)."
+    return "The submission didn’t meet the task conditions.\nYou have a 2-day extension for resubmission."
 
 
 def calculate_grades() -> list:
@@ -97,7 +108,7 @@ def calculate_grades() -> list:
             # initiate student grade
             student_name = re.split("_", student_folder)[0]
             init_student_entry(grades, student_name)
-            student = grades[student_name]
+            student = grades[students_name_to_id.get(student_name, student_name)]
             # extracting files under student folder
             student_folder_path = os.path.join(temp_folder_path, student_folder)
             extract_student_path = os.path.join(student_folder_path, "extract")
@@ -118,6 +129,7 @@ def calculate_grades() -> list:
                     if jupyter_vsc_extention_identifier in vsc_config.read():
                         student["jupyter_notebook_vsc_extention_added"] = True
                         student["grade"] += 20
+            student["comments"] = get_student_comment(student)
     return grades
 
 

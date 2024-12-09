@@ -14,11 +14,15 @@ dependencies = [
 dev = [
     "tox",
     "ipykernel",
+    "my-project[os]",
     "my-project[ds]",
     "my-project[lint]",
     "my-project[test]",
     "my-project[doc]",
     "my-project[build]",
+]
+os = [
+    "rarfile",
 ]
 ds = [
     "numpy==2.1.3",
